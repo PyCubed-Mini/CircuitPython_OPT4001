@@ -231,6 +231,12 @@ class OPT4001:
 
     def read_from_fifo(self, register_high, regist_low, just_lux):
         """
+        Gets Lux value from sepcified FIFO register. returns lux value as a float.
+        If just_lux is false the counter and crc bits will be added and a tuple of the
+        3 measurements will be returned
+        """
+
+        """
         15-12: EXPONENT
         11-0: RESULT_MSB
         """
