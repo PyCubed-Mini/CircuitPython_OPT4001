@@ -1,6 +1,6 @@
 """
 CircuitPython driver for the OPT4001 ALS
-    SOT-5X3 variant
+    SOT-5X3 variant and PicoStar variant
 
 **Authors**
 Thomas Damiani
@@ -23,6 +23,8 @@ from adafruit_register.i2c_bits import RWBits
 from adafruit_register.i2c_bit import ROBit, RWBit
 
 try:
+    import typing
+    from busio import I2C
     from typing_extensions import Literal
 except ImportError:
     pass
@@ -42,12 +44,97 @@ CONFIGURATION   = 0x0A
 FLAGS           = 0x0C
 DEVICE_ID       = 0x11
 
+# package type
+SOT_5X3 = 0
+PICOSTAR = 1
 
 class OPT4001:
     """
-    Configuration settings
-    Locations of these bits are descirbed in page 30 and 31 of the datasheet
+    Driver for the OPT4001 ambient light sensor
+
+    Arguments
+    ---------
+
+    **i2c_bus**
+
+    Type - busio.I2C.\n
+    The i2c_bus you are using for I2C communication.
+
+    **address**
+
+    The i2c address of the sun sensor you are using. the default is 0x44
+
+    **quick_wakeup**
+
+    wakeup mode from Standby in one-shot mode. True activates quick Wake-up which
+    gets out of standby faster as the cost of larger power consumption.
+
+    **lux_range**
+
+    the range which the result will use to return a result
+
+    +-----------+-----------+-----------+-----------+-----------+
+    | 0         | 1         | 2         | 3         | 4         |
+    +-----------+-----------+-----------+-----------+-----------+
+    | 459 lux   | 918 lux   | 1.8 klux  | 3.7 klux  | 7.3 klux  |
+    +-----------+-----------+-----------+-----------+-----------+
+    | 5         | 6         | 7         | 8         | 12        |
+    +-----------+-----------+-----------+-----------+-----------+
+    | 14.7 klux | 29.4 klux | 58.7 klux | 117.4 klux| auto      |
+    +-----------+-----------+-----------+-----------+-----------+
+
+    **conversion_time**
+
+    How long the device will take to be ready with the next measurement
+
+    +-----------+-----------+-----------+-----------+-----------+-----------+
+    | 0         | 1         | 2         | 3         | 4         | 5         |
+    +-----------+-----------+-----------+-----------+-----------+-----------+
+    | 600us     | 1ms       | 1.8ms     | 3.4ms     | 6.5ms     | 12.7ms    |
+    +-----------+-----------+-----------+-----------+-----------+-----------+
+    | 6         | 7         | 8         | 9         | 10        | 11        |
+    +-----------+-----------+-----------+-----------+-----------+-----------+
+    | 25ms      | 50ms      | 100ms     | 200ms     | 400ms     | 800ms     |
+    +-----------+-----------+-----------+-----------+-----------+-----------+
+
+    **Operating Mode**
+
+    what mode the sensor will operate in\n
+    0 - Power Down\n
+    1 - Forced Auto-range One-shot\n
+    2 - One-shot\n
+    3 - Continuous
+
+    **Latch**
+
+    which interrupt mechanism the sensor will use when an interrupt is needed. Interrupt
+    reporting mechanisms as described in page 14 and 15 of the datasheet\n
+    0 - Transparent hysteresis mode\n
+    1 - Latched window mode
+
+    **int_pol**
+
+    INT pin polarity\n
+    0 - Active Low\n
+    1 - Active High
+
+    **fault_count**
+
+    describes how many consecutive faults are required to trigger the theshold mechanisms.\n
+    0 - one fault\n
+    1 - two faults\n
+    2 - four faults\n
+    3 - eight faults
+
+    **package**
+
+    what package your ambient sun sensor is using\n
+    0 - SOT-5x3\n
+    1 - PicoStar
     """
+
+    # Configuration settings
+    # Locations of these bits are descirbed in page 30 and 31 of the datasheet
     quick_wakeup            = RWBit(CONFIGURATION, 15, register_width=2, lsb_first=False)
     lux_range               = RWBits(4, CONFIGURATION, 10, register_width=2, lsb_first=False)
     conversion_time         = RWBits(4, CONFIGURATION, 6, register_width=2, lsb_first=False)
@@ -62,28 +149,33 @@ class OPT4001:
     flag_h                  = ROBit(FLAGS, 1, register_width=2, lsb_first=False)
     flag_L                  = ROBit(FLAGS, 0, register_width=2, lsb_first=False)
 
-    # default address 0x44
-    def __init__(self, i2c_bus,
-                 address=0x44,
-                 quick_wakeup=False,
-                 lux_range=0b1100,
-                 conversion_time=0b1000,
-                 operating_mode=0b00,
-                 latch=True,
-                 int_pol=False,
-                 fault_count=0b00) -> "OPT4001":
-        # initliaze i2c device
+    def __init__(self,
+                 i2c_bus: I2C,
+                 address: int = 0x44,
+                 package: int = 0,
+                 quick_wakeup: bool = False,
+                 lux_range: int = 0b1100,
+                 conversion_time: int = 0b1000,
+                 operating_mode: int = 0b00,
+                 latch: bool = True,
+                 int_pol: bool = False,
+                 fault_count: int = 0b00) -> "OPT4001":
+
         self.i2c_device = I2CDevice(i2c_bus, address)
+        """
+        i2c_device: and I2CDevice initialized using the input i2c_bus and address
+        """
 
         self.quick_wakeup = quick_wakeup
         """
-        Quick Wake-up from Standby in one-shot mode. gets out of standby faster as the cost of
-        larger power consumption.
+        quick_wakeup: wakeup mode from Standby in one-shot mode. True activates quick Wake-up which
+        gets out of standby faster as the cost of larger power consumption.
+
         """
 
         self.lux_range = lux_range
         """
-        Lux range\n
+        Lux range: the range which the result will use to return a result\n
         | 0         | 1         | 2         | 3         | 4         | 5         |
         | 459lux    | 918lux    | 1.8klux   | 3.7klux   | 7.3klux   | 14.7klux  |
 
@@ -93,7 +185,7 @@ class OPT4001:
 
         self.conversion_time = conversion_time
         """
-        Conversion Time\n
+        Conversion Time: How long the device will take to be ready with the next measurement\n
         | 0         | 1         | 2         | 3         | 4         | 5         |
         | 600us     | 1ms       | 1.8ms     | 3.4ms     | 6.5ms     | 12.7ms    |
 
@@ -132,6 +224,12 @@ class OPT4001:
         1: two faults\n
         2: four faults\n
         3: eight faults\n
+        """
+
+        self.package = package
+        """
+        if your device is Picostar (1) or SOT-5x3 (0)
+
         """
 
         self.buf = bytearray(3)
@@ -185,6 +283,17 @@ class OPT4001:
         crc = self.buf[1] & ((1 << 4) - 1)              # 3-0
 
         return result_lsb, counter, crc
+
+    def calc_lux(self, exponent, result_msb, result_lsb) -> float:
+        mantissa = (result_msb << 8) + result_lsb
+        adc_codes = mantissa << exponent
+
+        if self.package == PICOSTAR:
+            lux = adc_codes * 0.0003125
+        if self.package == SOT_5X3:
+            lux = adc_codes * 0.0004375
+
+        return lux
 
     def result_of_addr(self, just_lux) -> list:
         """
