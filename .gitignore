@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2023 Thomas Damiani, written for Carnegie Mellon University's RExLab
+#                         with credit to Kattni Rembor of Adafruit Industries
+
+# SPDX-License-Identifier: MIT
+
+# CircuitPython-specific files
+*.mpy
+
+# Python-specific files
+__pycache__
+*.pyc
+
+# Sphinx build-specific files
+_build
+
+# This file results from running `pip -e install .` in a local repository
+*.egg-info
+
+# Virtual environment-specific files
+.env
+.venv
+
+# MacOS-specific files
+*.DS_Store
+
+# IDE-specific files
+.idea
+.vscode
+*~
