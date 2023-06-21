@@ -75,65 +75,64 @@ class OPT4001:
         # initliaze i2c device
         self.i2c_device = I2CDevice(i2c_bus, address)
 
-        """------ configure the OPT4001 ------"""
+        self.quick_wakeup = quick_wakeup
         """
         Quick Wake-up from Standby in one-shot mode. gets out of standby faster as the cost of
         larger power consumption.
         """
-        self.quick_wakeup = quick_wakeup
+
+        self.lux_range = lux_range
         """
-        Lux range
+        Lux range\n
         | 0         | 1         | 2         | 3         | 4         | 5         |
         | 459lux    | 918lux    | 1.8klux   | 3.7klux   | 7.3klux   | 14.7klux  |
-        -------------------------------------------------------------------------
+
         | 6         | 7         | 8         | 12        |
         | 29.4klux  | 58.7klux  | 117.4klux | auto      |
         """
-        self.lux_range = lux_range
 
+        self.conversion_time = conversion_time
         """
-        Conversion Time
+        Conversion Time\n
         | 0         | 1         | 2         | 3         | 4         | 5         |
         | 600us     | 1ms       | 1.8ms     | 3.4ms     | 6.5ms     | 12.7ms    |
-        -------------------------------------------------------------------------
+
         | 6         | 7         | 8         | 9         | 10        | 11        |
         | 25ms      | 50ms      | 100ms     | 200ms     | 400ms     | 800ms     |
         """
-        self.conversion_time = conversion_time
 
-        """
-        Operating Mode
-        0: Power Down
-        1: Forced Auto-range One-shot
-        2: One-shot
-        3: Continuous
-        """
         self.operating_mode = operating_mode
-
         """
-        Interrupt reporting mechanisms as described in page 14 and 15 of the datasheet
-
-        0: Transparent hysteresis mode
-        1: Latched window mode
+        Operating Mode\n
+        0: Power Down\n
+        1: Forced Auto-range One-shot\n
+        2: One-shot\n
+        3: Continuous\n
         """
+
         self.latch = latch
+        """
+        Interrupt reporting mechanisms as described in page 14 and 15 of the datasheet\n
+        0: Transparent hysteresis mode\n
+        1: Latched window mode\n
+        """
 
-        """
-        INT pin polarity
-        0: Active Low
-        1: Active High
-        """
         self.int_pol = int_pol
+        """
+        INT pin polarity\n
+        0: Active Low\n
+        1: Active High\n
+        """
 
+        self.fault_count = fault_count
         """
         Fault count describes how many consecutive faults are required to trigger the theshold
-        mechanisms.
-        0: one fault
-        1: two faults
-        2: four faults
-        3: eight faults
+        mechanisms.\n
+        0: one fault\n
+        1: two faults\n
+        2: four faults\n
+        3: eight faults\n
         """
-        self.fault_count = fault_count
 
         self.buf = bytearray(3)
 
