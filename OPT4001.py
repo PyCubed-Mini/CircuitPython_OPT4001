@@ -16,7 +16,7 @@ Thomas Damiani
 """
 
 import time
-from micropython import const
+# from micropython import const
 
 from adafruit_bus_device.i2c_device import I2CDevice
 from adafruit_register.i2c_bits import RWBits
@@ -28,19 +28,19 @@ except ImportError:
     pass
 
 # Registers as descirbed in page 25 of datasheet
-RESULT_H        = const(0x00)
-RESULT_L        = const(0x01)
-FIFO_0_H        = const(0x02)
-FIFO_0_L        = const(0x03)
-FIFO_1_H        = const(0x04)
-FIFO_1_L        = const(0x05)
-FIFO_2_H        = const(0x06)
-FIFO_2_L        = const(0x07)
-THRESHOLD_L     = const(0x08)
-THRESHOLD_H     = const(0x09)
-CONFIGURATION   = const(0x0A)
-FLAGS           = const(0x0C)
-DEVICE_ID       = const(0x11)
+RESULT_H        = 0x00
+RESULT_L        = 0x01
+FIFO_0_H        = 0x02
+FIFO_0_L        = 0x03
+FIFO_1_H        = 0x04
+FIFO_1_L        = 0x05
+FIFO_2_H        = 0x06
+FIFO_2_L        = 0x07
+THRESHOLD_L     = 0x08
+THRESHOLD_H     = 0x09
+CONFIGURATION   = 0x0A
+FLAGS           = 0x0C
+DEVICE_ID       = 0x11
 
 
 class OPT4001:

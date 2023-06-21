@@ -17,6 +17,7 @@ _build
 *.egg-info
 
 # Virtual environment-specific files
+environment/
 .env
 .venv
 
