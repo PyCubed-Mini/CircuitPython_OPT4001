@@ -1,6 +1,3 @@
-api
-*****
-
 OPT4001
 -------
 .. automodule:: OPT4001

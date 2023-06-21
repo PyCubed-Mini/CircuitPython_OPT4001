@@ -12,4 +12,4 @@ This Driver depends on:
 
 Documentation
 =============
-Under construction
+documentation can be found `here <https://circuitpython-opt4001.readthedocs.io/en/latest/>`_

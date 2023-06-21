@@ -12,6 +12,11 @@ Welcome to CircuitPython OPT4001 driver's documentation!
 
    api
 
+.. toctree::
+   :caption: Examples
+
+   example
+
 Indices and tables
 ==================
 
