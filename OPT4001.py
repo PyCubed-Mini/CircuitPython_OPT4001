@@ -52,8 +52,8 @@ class OPT4001:
     """
     Driver for the OPT4001 ambient light sensor
 
-    Arguments
-    ---------
+    Positional Arguments
+    ++++++++++++++++++++
 
     **i2c_bus**
 
@@ -64,23 +64,36 @@ class OPT4001:
 
     The i2c address of the sun sensor you are using. the default is 0x44
 
+    Keyword Arguments
+    +++++++++++++++++
+
+    * bold value is the default value
+
     **quick_wakeup**
 
     wakeup mode from Standby in one-shot mode. True activates quick Wake-up which
     gets out of standby faster as the cost of larger power consumption.
 
+    +-------------------------------+-----------------------+
+    | True                          | **False**             |
+    +-------------------------------+-----------------------+
+    | active                        | **inactive**          |
+    +-------------------------------+-----------------------+
+
+
     **lux_range**
 
-    the range which the result will use to return a result
+    the range which the result register will use to return a result
 
     +-----------+-----------+-----------+-----------+-----------+
     | 0         | 1         | 2         | 3         | 4         |
     +-----------+-----------+-----------+-----------+-----------+
     | 459 lux   | 918 lux   | 1.8 klux  | 3.7 klux  | 7.3 klux  |
     +-----------+-----------+-----------+-----------+-----------+
-    | 5         | 6         | 7         | 8         | 12        |
     +-----------+-----------+-----------+-----------+-----------+
-    | 14.7 klux | 29.4 klux | 58.7 klux | 117.4 klux| auto      |
+    | 5         | 6         | 7         | 8         | **12**    |
+    +-----------+-----------+-----------+-----------+-----------+
+    | 14.7 klux | 29.4 klux | 58.7 klux | 117.4 klux| **auto**  |
     +-----------+-----------+-----------+-----------+-----------+
 
     **conversion_time**
@@ -92,44 +105,58 @@ class OPT4001:
     +-----------+-----------+-----------+-----------+-----------+-----------+
     | 600us     | 1ms       | 1.8ms     | 3.4ms     | 6.5ms     | 12.7ms    |
     +-----------+-----------+-----------+-----------+-----------+-----------+
-    | 6         | 7         | 8         | 9         | 10        | 11        |
     +-----------+-----------+-----------+-----------+-----------+-----------+
-    | 25ms      | 50ms      | 100ms     | 200ms     | 400ms     | 800ms     |
+    | 6         | 7         | **8**     | 9         | 10        | 11        |
+    +-----------+-----------+-----------+-----------+-----------+-----------+
+    | 25ms      | 50ms      | **100ms** | 200ms     | 400ms     | 800ms     |
     +-----------+-----------+-----------+-----------+-----------+-----------+
 
     **Operating Mode**
 
-    what mode the sensor will operate in\n
-    0 - Power Down\n
-    1 - Forced Auto-range One-shot\n
-    2 - One-shot\n
-    3 - Continuous
+    what mode the sensor will operate in
+
+    +-----------+-----------+-----------+-----------+
+    | **0**     | 1         | 2         | 3         |
+    +-----------+-----------+-----------+-----------+
+    | **Power   | Forced    | One-shot  | continuous|
+    | Down**    | auto-range|           |           |
+    |           | One-shot  |           |           |
+    +-----------+-----------+-----------+-----------+
 
     **Latch**
 
     which interrupt mechanism the sensor will use when an interrupt is needed. Interrupt
     reporting mechanisms as described in page 14 and 15 of the datasheet\n
-    0 - Transparent hysteresis mode\n
-    1 - Latched window mode
+
+    +-------------------------------+-----------------------+
+    | True                          | **False**             |
+    +-------------------------------+-----------------------+
+    | Transparent hysteresis mode   |**Latched window mode**|
+    +-------------------------------+-----------------------+
 
     **int_pol**
 
-    INT pin polarity\n
-    0 - Active Low\n
-    1 - Active High
+    INT pin polarity
+
+    +-------------------------------+-----------------------+
+    | True                          | **False**             |
+    +-------------------------------+-----------------------+
+    | Active High                   | **Active Low**        |
+    +-------------------------------+-----------------------+
 
     **fault_count**
 
     describes how many consecutive faults are required to trigger the theshold mechanisms.\n
-    0 - one fault\n
-    1 - two faults\n
-    2 - four faults\n
-    3 - eight faults
+    +------------+-----------+-----------+-----------+-----------+
+    |input       | **0**     | 1         | 2         | 3         |
+    +------------+-----------+-----------+-----------+-----------+
+    |fault count | **one**   | two       | four      | eight     |
+    +------------+-----------+-----------+-----------+-----------+
 
     **package**
 
     what package your ambient sun sensor is using\n
-    0 - SOT-5x3\n
+    **0 - SOT-5x3**\n
     1 - PicoStar
     """
 
@@ -375,6 +402,7 @@ class OPT4001:
         the 0x01 register bits 15-8 are the RESULT_LSB.
 
         lux is calculated via:
+
         lux = (((RESULT_MSB << 8) + RESULT_LSB) << EXPONENT) * 437.5E-6
         """
         return self.result_of_addr(True)
@@ -395,10 +423,15 @@ class OPT4001:
         E = exponent bits
         R = result bits
         C = counter bits
-        X[0]=XOR(E[3:0],R[19:0],C[3:0]) XOR of all bits
-        X[1]=XOR(C[1],C[3],R[1],R[3],R[5],R[7],R[9],R[11],R[13],R[15],R[17],R[19],E[1],E[3])
-        X[2]=XOR(C[3],R[3],R[7],R[11],R[15],R[19],E[3])
-        X[3]=XOR(R[3],R[11],R[19])
+
+        X[0]
+            XOR ( E[3:0],R[19:0],C[3:0]) XOR of all bits
+        X[1]
+            XOR ( C[1], C[3], R[1], R[3], R[5], R[7], R[9], R[11], R[13], R[15], R[17], R[19], E[1], E[3])
+        X[2]
+            XOR ( C[3], R[3], R[7], R[11], R[15], R[19], E[3])
+        X[3]
+            XOR ( R[3], R[11], R[19])
         """
         return self.result_of_addr(False)
 
